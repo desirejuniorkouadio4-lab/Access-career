@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
 
-const protectedPaths = ["/admin", "/instructor", "/student", "/moderator"]
+const protectedPaths = ["/admin", "/instructor", "/student", "/moderator", "/dashboard"]
 const authPaths = ["/login", "/register"]
 
 export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Auth.js stocke la session dans ce cookie (http en dev, https en prod)
   const session =
     request.cookies.get("authjs.session-token")?.value ||
     request.cookies.get("__Secure-authjs.session-token")?.value
@@ -22,7 +21,7 @@ export default function proxy(request: NextRequest) {
   }
 
   if (isAuthPage && isLoggedIn) {
-    return NextResponse.redirect(new URL("/student", request.url))
+    return NextResponse.redirect(new URL("/dashboard", request.url))
   }
 
   return NextResponse.next()

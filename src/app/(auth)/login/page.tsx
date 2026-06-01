@@ -34,7 +34,7 @@ function LoginForm() {
         return
       }
       // Rediriger selon le rôle (le middleware s'en chargera aussi)
-      router.push("/student")
+      router.push("/dashboard")
       router.refresh()
     } catch {
       setError("Erreur de connexion. Réessayez.")
