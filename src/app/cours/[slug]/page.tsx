@@ -37,8 +37,8 @@ const gradients: Record<string, string> = {
 
 export default function CourseDetailPage() {
   const { slug } = useParams()
-  const router = useRouter()
-  const { data: session } = useSession()
+  const router   = useRouter()
+  const { data: session, status } = useSession()
 
   const [course, setCourse]           = useState<Course | null>(null)
   const [loading, setLoading]         = useState(true)
@@ -47,26 +47,42 @@ export default function CourseDetailPage() {
   const [message, setMessage]         = useState("")
   const [openChapter, setOpenChapter] = useState<string | null>(null)
 
+  // Effet 1 — charger le cours (une seule fois au montage)
   useEffect(() => {
+    if (!slug) return
     const load = async () => {
       setLoading(true)
-      const res = await fetch(`/api/courses/${slug}`)
-      if (!res.ok) { setCourse(null); setLoading(false); return }
-      const data = await res.json()
-      setCourse(data)
-      if (data.chapters?.length > 0) setOpenChapter(data.chapters[0].id)
-
-      // Vérifier si déjà inscrit
-      if (session?.user) {
-        const checkRes = await fetch(`/api/enrollments/check?courseId=${data.id}`)
-        const checkData = await checkRes.json()
-        setEnrolled(checkData.enrolled)
+      try {
+        const res = await fetch(`/api/courses/${slug}`)
+        if (!res.ok) { setCourse(null); return }
+        const data = await res.json()
+        setCourse(data)
+        if (data.chapters?.length > 0) setOpenChapter(data.chapters[0].id)
+      } catch {
+        setCourse(null)
+      } finally {
+        setLoading(false)
       }
-
-      setLoading(false)
     }
-    if (slug) load()
-  }, [slug, session])
+    load()
+  }, [slug]) // Dépend uniquement du slug
+
+  // Effet 2 — vérifier l'inscription (seulement quand cours + session sont prêts)
+  useEffect(() => {
+    if (!course || status === "loading") return
+    if (!session?.user) { setEnrolled(false); return }
+
+    const check = async () => {
+      try {
+        const res  = await fetch(`/api/enrollments/check?courseId=${course.id}`)
+        const data = await res.json()
+        setEnrolled(data.enrolled)
+      } catch {
+        setEnrolled(false)
+      }
+    }
+    check()
+  }, [course?.id, status]) // Dépend de l'ID du cours et du statut de session
 
   const handleEnroll = async () => {
     if (!session) {
@@ -79,19 +95,24 @@ export default function CourseDetailPage() {
       return
     }
     setEnrolling(true)
-    const res = await fetch("/api/enrollments", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ courseId: course.id }),
-    })
-    const data = await res.json()
-    if (data.enrolled) {
-      setEnrolled(true)
-      setMessage("Inscription réussie !")
-    } else {
-      setMessage(data.error || "Erreur lors de l'inscription.")
+    try {
+      const res  = await fetch("/api/enrollments", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ courseId: course.id }),
+      })
+      const data = await res.json()
+      if (data.enrolled) {
+        setEnrolled(true)
+        setMessage("Inscription réussie !")
+      } else {
+        setMessage(data.error || "Erreur lors de l'inscription.")
+      }
+    } catch {
+      setMessage("Erreur de connexion.")
+    } finally {
+      setEnrolling(false)
     }
-    setEnrolling(false)
   }
 
   if (loading) return (
@@ -146,12 +167,12 @@ export default function CourseDetailPage() {
               <h1 className="text-3xl md:text-4xl font-extrabold leading-tight mb-4">{course.title}</h1>
               <p className="text-white/80 text-base leading-relaxed mb-6 max-w-2xl">{course.description}</p>
               <div className="flex flex-wrap gap-6 text-sm text-white/80">
-                <span className="flex items-center gap-2"><Users size={15} /> {course._count.enrollments} apprenants</span>
-                <span className="flex items-center gap-2"><BarChart3 size={15} /> {levelLabels[course.level]}</span>
-                <span className="flex items-center gap-2"><BookOpen size={15} /> Par {course.instructor.name}</span>
+                <span className="flex items-center gap-2"><Users size={15}/> {course._count.enrollments} apprenants</span>
+                <span className="flex items-center gap-2"><BarChart3 size={15}/> {levelLabels[course.level]}</span>
+                <span className="flex items-center gap-2"><BookOpen size={15}/> Par {course.instructor.name}</span>
                 {totalLessons > 0 && (
                   <span className="flex items-center gap-2">
-                    <Play size={15} /> {totalLessons} leçons
+                    <Play size={15}/> {totalLessons} leçons
                     {totalDuration > 0 && ` · ${Math.round(totalDuration / 60)}h`}
                   </span>
                 )}
@@ -178,12 +199,17 @@ export default function CourseDetailPage() {
                 </div>
               )}
 
-              {enrolled ? (
+              {/* Bouton selon état */}
+              {status === "loading" ? (
+                <div className="w-full flex items-center justify-center py-3.5 bg-zinc-100 rounded-xl">
+                  <Loader2 size={18} className="animate-spin text-zinc-400" />
+                </div>
+              ) : enrolled ? (
                 <Link
                   href={`/learn/${course.slug}`}
                   className="w-full flex items-center justify-center gap-2 py-3.5 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition"
                 >
-                  <Play size={18} /> Accéder au cours
+                  <Play size={18}/> Accéder au cours
                 </Link>
               ) : (
                 <button
@@ -192,25 +218,27 @@ export default function CourseDetailPage() {
                   className="w-full flex items-center justify-center gap-2 py-3.5 bg-violet-700 text-white font-semibold rounded-xl hover:bg-violet-800 transition disabled:opacity-60"
                 >
                   {enrolling
-                    ? <><Loader2 size={18} className="animate-spin" /> Inscription...</>
+                    ? <><Loader2 size={18} className="animate-spin"/> Inscription...</>
                     : course.isFree
-                      ? <><CheckCircle size={18} /> S&apos;inscrire gratuitement</>
-                      : <><Lock size={18} /> Payer avec Wave</>
+                      ? <><CheckCircle size={18}/> S&apos;inscrire gratuitement</>
+                      : <><Lock size={18}/> Payer avec Wave</>
                   }
                 </button>
               )}
 
-              {!session && (
+              {status !== "loading" && !session && (
                 <p className="text-xs text-zinc-500 text-center mt-3">
                   Un compte est requis.{" "}
-                  <Link href="/register" className="text-violet-700 font-semibold hover:underline">Créer un compte</Link>
+                  <Link href="/register" className="text-violet-700 font-semibold hover:underline">
+                    Créer un compte
+                  </Link>
                 </p>
               )}
 
               <ul className="mt-5 space-y-2 pt-5 border-t border-zinc-100">
                 {["Accès à vie au contenu", "Certificat à la fin", "Projets pratiques inclus", "Accès mobile et desktop"].map((item) => (
                   <li key={item} className="flex items-center gap-2 text-xs text-zinc-600">
-                    <CheckCircle size={13} className="text-emerald-500 flex-shrink-0" /> {item}
+                    <CheckCircle size={13} className="text-emerald-500 flex-shrink-0"/> {item}
                   </li>
                 ))}
               </ul>
@@ -220,8 +248,8 @@ export default function CourseDetailPage() {
       </div>
 
       {/* Programme */}
-      <div className="max-w-6xl mx-auto px-6 py-16">
-        {course.chapters.length > 0 && (
+      {course.chapters.length > 0 && (
+        <div className="max-w-6xl mx-auto px-6 py-16">
           <div className="max-w-3xl">
             <h2 className="text-2xl font-extrabold text-ink mb-2">Programme du cours</h2>
             <p className="text-zinc-500 text-sm mb-6">
@@ -244,8 +272,8 @@ export default function CourseDetailPage() {
                     <div className="flex items-center gap-3">
                       <span className="text-xs text-zinc-400">{chapter.lessons.length} leçons</span>
                       {openChapter === chapter.id
-                        ? <ChevronDown size={16} className="text-zinc-400" />
-                        : <ChevronRight size={16} className="text-zinc-400" />
+                        ? <ChevronDown size={16} className="text-zinc-400"/>
+                        : <ChevronRight size={16} className="text-zinc-400"/>
                       }
                     </div>
                   </button>
@@ -254,12 +282,14 @@ export default function CourseDetailPage() {
                       {chapter.lessons.map((lesson) => (
                         <div key={lesson.id} className="flex items-center gap-3 px-5 py-3 border-b border-zinc-50 last:border-0">
                           <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${lesson.isFree ? "bg-emerald-100 text-emerald-600" : "bg-zinc-100 text-zinc-400"}`}>
-                            {lesson.isFree ? <Play size={13} /> : <Lock size={13} />}
+                            {lesson.isFree ? <Play size={13}/> : <Lock size={13}/>}
                           </div>
                           <span className="text-sm text-zinc-700 flex-1">{lesson.title}</span>
                           <div className="flex items-center gap-2">
                             {lesson.isFree && (
-                              <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Aperçu</span>
+                              <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                                Aperçu
+                              </span>
                             )}
                             {lesson.duration > 0 && (
                               <span className="text-xs text-zinc-400">{lesson.duration} min</span>
@@ -273,8 +303,8 @@ export default function CourseDetailPage() {
               ))}
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       <Footer />
     </>
