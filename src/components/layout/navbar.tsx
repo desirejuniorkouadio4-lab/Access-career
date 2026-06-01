@@ -29,7 +29,7 @@ export default function Navbar() {
         </Link>
 
         <div className="hidden md:flex items-center gap-7">
-          <Link href="#catalogue" className="text-sm font-medium text-zinc-600 hover:text-violet-700 transition">
+          <Link href="/catalogue" className="text-sm font-medium text-zinc-600 hover:text-violet-700 transition">
             Catalogue
           </Link>
           <Link href="#parcours" className="text-sm font-medium text-zinc-600 hover:text-violet-700 transition">
