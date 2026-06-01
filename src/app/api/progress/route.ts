@@ -2,6 +2,44 @@ import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 
+export async function GET(req: Request) {
+  try {
+    const session = await auth()
+    if (!session?.user) return NextResponse.json({ completedLessonIds: [] })
+
+    const { searchParams } = new URL(req.url)
+    const courseId = searchParams.get("courseId")
+    if (!courseId) return NextResponse.json({ completedLessonIds: [] })
+
+    // Récupérer toutes les leçons du cours
+    const course = await db.course.findUnique({
+      where: { id: courseId },
+      include: {
+        chapters: { include: { lessons: { select: { id: true } } } },
+      },
+    })
+
+    if (!course) return NextResponse.json({ completedLessonIds: [] })
+
+    const allLessonIds = course.chapters.flatMap(c => c.lessons.map(l => l.id))
+
+    const progress = await db.userProgress.findMany({
+      where: {
+        userId: session.user.id!,
+        lessonId: { in: allLessonIds },
+        isCompleted: true,
+      },
+      select: { lessonId: true },
+    })
+
+    return NextResponse.json({
+      completedLessonIds: progress.map(p => p.lessonId),
+    })
+  } catch {
+    return NextResponse.json({ completedLessonIds: [] })
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const session = await auth()
@@ -23,27 +61,36 @@ export async function POST(req: Request) {
     // Vérifier si tout le cours est terminé
     const lesson = await db.lesson.findUnique({
       where: { id: lessonId },
-      include: { chapter: { include: { course: { include: { chapters: { include: { lessons: true } } } } } } },
+      include: {
+        chapter: {
+          include: {
+            course: {
+              include: { chapters: { include: { lessons: { select: { id: true } } } } },
+            },
+          },
+        },
+      },
     })
 
     if (lesson) {
-      const allLessons = lesson.chapter.course.chapters.flatMap(c => c.lessons)
+      const allLessonIds = lesson.chapter.course.chapters.flatMap(c => c.lessons.map(l => l.id))
       const completedCount = await db.userProgress.count({
         where: {
           userId: session.user.id!,
-          lessonId: { in: allLessons.map(l => l.id) },
+          lessonId: { in: allLessonIds },
           isCompleted: true,
         },
       })
 
-      if (completedCount === allLessons.length) {
+      if (completedCount === allLessonIds.length) {
         await db.enrollment.updateMany({
           where: { userId: session.user.id!, courseId: lesson.chapter.courseId },
           data: { completedAt: new Date(), progress: 100 },
         })
-        // Créer le certificat automatiquement
         await db.certificate.upsert({
-          where: { userId_courseId: { userId: session.user.id!, courseId: lesson.chapter.courseId } },
+          where: {
+            userId_courseId: { userId: session.user.id!, courseId: lesson.chapter.courseId },
+          },
           update: {},
           create: { userId: session.user.id!, courseId: lesson.chapter.courseId },
         })
