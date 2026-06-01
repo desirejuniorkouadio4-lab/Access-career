@@ -118,122 +118,215 @@ function CertificateCard({
 
   const handleDownload = () => {
     const canvas = document.createElement("canvas")
-    canvas.width  = 1200
-    canvas.height = 850
+    canvas.width  = 1400
+    canvas.height = 990
     const ctx = canvas.getContext("2d")
     if (!ctx) return
 
-    // Fond
-    ctx.fillStyle = "#0A0A0A"
-    ctx.fillRect(0, 0, 1200, 850)
+    // ── Fond blanc cassé
+    ctx.fillStyle = "#FDFCF8"
+    ctx.fillRect(0, 0, 1400, 990)
 
-    // Bande décorative haut
-    ctx.fillStyle = "#7C3AED"
-    ctx.fillRect(0, 0, 1200, 8)
+    // ── Bordure extérieure violette épaisse
+    ctx.strokeStyle = "#6D28D9"
+    ctx.lineWidth = 14
+    ctx.strokeRect(7, 7, 1386, 976)
 
-    // Bordure intérieure
-    ctx.strokeStyle = "#2A2A2F"
+    // ── Bordure intérieure fine dorée
+    ctx.strokeStyle = "#C4B5FD"
     ctx.lineWidth = 2
-    ctx.strokeRect(30, 30, 1140, 790)
+    ctx.strokeRect(30, 30, 1340, 930)
 
-    // Logo "A"
-    ctx.fillStyle = "#7C3AED"
+    // ── Coins décoratifs
+    const drawCorner = (x: number, y: number, rx: number, ry: number) => {
+      ctx.strokeStyle = "#6D28D9"
+      ctx.lineWidth = 3
+      ctx.beginPath()
+      ctx.moveTo(x, y + ry * 0.4)
+      ctx.lineTo(x, y)
+      ctx.lineTo(x + rx * 0.4, y)
+      ctx.stroke()
+    }
+    drawCorner(30, 30, 40, 40)
+    drawCorner(1370, 30, -40, 40)
+    drawCorner(30, 960, 40, -40)
+    drawCorner(1370, 960, -40, -40)
+
+    // ── Bande décorative haut violette
+    const grad = ctx.createLinearGradient(0, 0, 1400, 0)
+    grad.addColorStop(0, "#4C1D95")
+    grad.addColorStop(0.5, "#7C3AED")
+    grad.addColorStop(1, "#4C1D95")
+    ctx.fillStyle = grad
+    ctx.fillRect(0, 0, 1400, 10)
+    ctx.fillRect(0, 980, 1400, 10)
+
+    // ── Logo + Nom plateforme
+    ctx.fillStyle = "#6D28D9"
     ctx.beginPath()
-    ctx.roundRect(80, 70, 60, 60, 12)
+    ctx.roundRect(90, 65, 58, 58, 12)
     ctx.fill()
     ctx.fillStyle = "#FFFFFF"
-    ctx.font = "bold 36px Arial"
+    ctx.font = "bold 32px Georgia"
     ctx.textAlign = "center"
-    ctx.fillText("A", 110, 112)
+    ctx.fillText("A", 119, 105)
 
-    // Nom plateforme
-    ctx.fillStyle = "#FFFFFF"
-    ctx.font = "bold 24px Arial"
+    ctx.fillStyle = "#1A1A2E"
+    ctx.font = "bold 26px Georgia"
     ctx.textAlign = "left"
-    ctx.fillText("Access Career", 160, 112)
+    ctx.fillText("Access Career", 165, 97)
+    ctx.fillStyle = "#6D28D9"
+    ctx.font = "13px Arial"
+    ctx.fillText("Un département de Digital Access · Côte d'Ivoire", 165, 118)
 
-    ctx.fillStyle = "#71717A"
-    ctx.font = "14px Arial"
-    ctx.fillText("Un département de Digital Access", 160, 135)
-
-    // Titre certificat
-    ctx.fillStyle = "#8B5CF6"
-    ctx.font = "bold 16px Arial"
+    // ── Titre principal
+    ctx.fillStyle = "#6D28D9"
+    ctx.font = "bold 15px Arial"
     ctx.textAlign = "center"
-    ctx.fillText("CERTIFICAT DE COMPLÉTION", 600, 240)
+    ctx.letterSpacing = "4px"
+    ctx.fillText("CERTIFICAT  DE  COMPLÉTION", 700, 200)
 
-    // Ligne décorative
-    ctx.strokeStyle = "#2A2A2F"
-    ctx.lineWidth = 1
+    // ── Ligne décorative sous le titre
+    ctx.strokeStyle = "#E9D5FF"
+    ctx.lineWidth = 1.5
     ctx.beginPath()
-    ctx.moveTo(200, 260)
-    ctx.lineTo(1000, 260)
+    ctx.moveTo(250, 220)
+    ctx.lineTo(1150, 220)
     ctx.stroke()
 
-    // Texte certifie
-    ctx.fillStyle = "#A1A1AA"
-    ctx.font = "18px Arial"
-    ctx.fillText("Ce certificat est décerné à", 600, 320)
+    // ── Ornement central
+    ctx.fillStyle = "#EDE9FE"
+    ctx.beginPath()
+    ctx.arc(700, 260, 22, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.fillStyle = "#6D28D9"
+    ctx.font = "bold 20px Georgia"
+    ctx.textAlign = "center"
+    ctx.fillText("✦", 700, 268)
 
-    // Nom de l'apprenant
-    ctx.fillStyle = "#FFFFFF"
-    ctx.font = "bold 52px Arial"
-    ctx.fillText(userName, 600, 400)
+    // ── Texte "Nous certifions que"
+    ctx.fillStyle = "#71717A"
+    ctx.font = "italic 20px Georgia"
+    ctx.textAlign = "center"
+    ctx.fillText("Nous certifions que", 700, 330)
 
-    // Ligne décorative sous nom
-    ctx.strokeStyle = "#7C3AED"
+    // ── Nom de l'apprenant
+    ctx.fillStyle = "#1A1A2E"
+    ctx.font = "bold 72px Georgia"
+    ctx.textAlign = "center"
+    ctx.fillText(userName, 700, 430)
+
+    // ── Ligne élégante sous le nom
+    const nw = ctx.measureText(userName).width
+    const lx = 700 - Math.min(nw, 700) / 2
+    const lw = Math.min(nw, 700)
+    const lineGrad = ctx.createLinearGradient(lx, 0, lx + lw, 0)
+    lineGrad.addColorStop(0, "transparent")
+    lineGrad.addColorStop(0.2, "#6D28D9")
+    lineGrad.addColorStop(0.8, "#6D28D9")
+    lineGrad.addColorStop(1, "transparent")
+    ctx.strokeStyle = lineGrad
     ctx.lineWidth = 2
-    const nameWidth = ctx.measureText(userName).width
     ctx.beginPath()
-    ctx.moveTo(600 - nameWidth / 2, 420)
-    ctx.lineTo(600 + nameWidth / 2, 420)
+    ctx.moveTo(lx, 448)
+    ctx.lineTo(lx + lw, 448)
     ctx.stroke()
 
-    // Texte "pour avoir complété"
-    ctx.fillStyle = "#A1A1AA"
-    ctx.font = "18px Arial"
-    ctx.fillText("pour avoir complété avec succès la formation", 600, 470)
+    // ── Texte "a complété avec succès"
+    ctx.fillStyle = "#71717A"
+    ctx.font = "italic 20px Georgia"
+    ctx.textAlign = "center"
+    ctx.fillText("a complété avec succès la formation", 700, 500)
 
-    // Titre du cours
-    ctx.fillStyle = "#FFFFFF"
-    ctx.font = "bold 28px Arial"
-    const courseTitle = certificate.course.title
-    if (ctx.measureText(courseTitle).width > 900) {
-      ctx.font = "bold 22px Arial"
+    // ── Titre du cours
+    ctx.fillStyle = "#1A1A2E"
+    let courseFont = "bold 36px Georgia"
+    ctx.font = courseFont
+    while (ctx.measureText(certificate.course.title).width > 1000 && parseInt(courseFont) > 22) {
+      const size = parseInt(courseFont) - 2
+      courseFont = `bold ${size}px Georgia`
+      ctx.font = courseFont
     }
-    ctx.fillText(courseTitle, 600, 530)
+    ctx.textAlign = "center"
+    ctx.fillText(certificate.course.title, 700, 565)
 
-    // Catégorie
-    ctx.fillStyle = "#8B5CF6"
-    ctx.font = "bold 14px Arial"
-    ctx.fillText(categoryLabels[certificate.course.category] || certificate.course.category, 600, 565)
+    // ── Badge catégorie
+    const catText = (categoryLabels[certificate.course.category] || certificate.course.category).toUpperCase()
+    const catW = ctx.measureText(catText).width + 48
+    ctx.font = "bold 13px Arial"
+    const catTextW = ctx.measureText(catText).width
+    ctx.fillStyle = "#EDE9FE"
+    ctx.beginPath()
+    ctx.roundRect(700 - catW / 2, 590, catW, 34, 17)
+    ctx.fill()
+    ctx.fillStyle = "#6D28D9"
+    ctx.textAlign = "center"
+    ctx.fillText(catText, 700, 613)
 
-    // Ligne décorative
-    ctx.strokeStyle = "#2A2A2F"
+    // ── Ligne séparatrice
+    ctx.strokeStyle = "#E9D5FF"
     ctx.lineWidth = 1
     ctx.beginPath()
-    ctx.moveTo(200, 600)
-    ctx.lineTo(1000, 600)
+    ctx.moveTo(200, 660)
+    ctx.lineTo(1200, 660)
     ctx.stroke()
 
-    // Infos bas
+    // ── Zone signatures (3 colonnes)
+    // Colonne gauche : Formateur
+    ctx.fillStyle = "#1A1A2E"
+    ctx.font = "bold 16px Georgia"
+    ctx.textAlign = "center"
+    ctx.fillText(certificate.course.instructor.name || "Access Career", 340, 720)
+    ctx.strokeStyle = "#D4D4D8"
+    ctx.lineWidth = 1
+    ctx.beginPath(); ctx.moveTo(200, 700); ctx.lineTo(480, 700); ctx.stroke()
     ctx.fillStyle = "#71717A"
-    ctx.font = "14px Arial"
+    ctx.font = "12px Arial"
+    ctx.fillText("Formateur", 340, 745)
+
+    // Colonne centre : Sceau
+    ctx.strokeStyle = "#6D28D9"
+    ctx.lineWidth = 2
+    ctx.beginPath()
+    ctx.arc(700, 715, 42, 0, Math.PI * 2)
+    ctx.stroke()
+    ctx.strokeStyle = "#C4B5FD"
+    ctx.lineWidth = 1
+    ctx.beginPath()
+    ctx.arc(700, 715, 36, 0, Math.PI * 2)
+    ctx.stroke()
+    ctx.fillStyle = "#6D28D9"
+    ctx.font = "bold 13px Arial"
+    ctx.textAlign = "center"
+    ctx.fillText("ACCESS", 700, 710)
+    ctx.fillText("CAREER", 700, 727)
+
+    // Colonne droite : Directeur
+    ctx.fillStyle = "#1A1A2E"
+    ctx.font = "bold 16px Georgia"
+    ctx.textAlign = "center"
+    ctx.fillText("Digital Access", 1060, 720)
+    ctx.strokeStyle = "#D4D4D8"
+    ctx.lineWidth = 1
+    ctx.beginPath(); ctx.moveTo(920, 700); ctx.lineTo(1200, 700); ctx.stroke()
+    ctx.fillStyle = "#71717A"
+    ctx.font = "12px Arial"
+    ctx.fillText("Organisme certificateur", 1060, 745)
+
+    // ── Footer : date + code
+    ctx.fillStyle = "#A1A1AA"
+    ctx.font = "12px Arial"
     ctx.textAlign = "left"
-    ctx.fillText(`Formateur : ${certificate.course.instructor.name || "Access Career"}`, 100, 660)
-    ctx.fillText(`Date de délivrance : ${date}`, 100, 690)
-
+    ctx.fillText("Délivré le " + date, 90, 910)
     ctx.textAlign = "right"
-    ctx.fillText(`Code de vérification : ${certificate.certCode}`, 1100, 660)
-    ctx.fillText("access-career-blush.vercel.app/verify", 1100, 690)
+    ctx.fillText("Code de vérification : " + certificate.certCode, 1310, 910)
+    ctx.fillStyle = "#C4B5FD"
+    ctx.textAlign = "center"
+    ctx.fillText("Ce certificat peut être vérifié sur access-career-blush.vercel.app/verify", 700, 935)
 
-    // Bande décorative bas
-    ctx.fillStyle = "#7C3AED"
-    ctx.fillRect(0, 842, 1200, 8)
-
-    // Télécharger
+    // ── Téléchargement
     const link = document.createElement("a")
-    link.download = `certificat-access-career-${certificate.certCode}.png`
+    link.download = `certificat-${certificate.certCode}.png`
     link.href = canvas.toDataURL("image/png")
     link.click()
   }
