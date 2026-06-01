@@ -25,39 +25,48 @@ const levelLabels: Record<string, string> = {
   BEGINNER: "Débutant", INTERMEDIATE: "Intermédiaire", ADVANCED: "Avancé",
 }
 const gradients: Record<string, string> = {
-  INFORMATIQUE: "from-violet-600 to-violet-900",
-  IA_DATA: "from-blue-600 to-indigo-900",
+  INFORMATIQUE:  "from-violet-600 to-violet-900",
+  IA_DATA:       "from-blue-600 to-indigo-900",
   DEVELOPPEMENT: "from-emerald-600 to-teal-900",
   COMMUNICATION: "from-pink-600 to-rose-900",
   EMPLOYABILITE: "from-amber-500 to-orange-800",
-  MARKETING: "from-cyan-600 to-blue-800",
-  DESIGN: "from-purple-600 to-pink-800",
-  LANGUES: "from-orange-500 to-red-700",
+  MARKETING:     "from-cyan-600 to-blue-800",
+  DESIGN:        "from-purple-600 to-pink-800",
+  LANGUES:       "from-orange-500 to-red-700",
 }
 
 export default function CourseDetailPage() {
   const { slug } = useParams()
   const router = useRouter()
   const { data: session } = useSession()
-  const [course, setCourse]         = useState<Course | null>(null)
-  const [loading, setLoading]       = useState(true)
-  const [enrolling, setEnrolling]   = useState(false)
-  const [enrolled, setEnrolled]     = useState(false)
-  const [message, setMessage]       = useState("")
+
+  const [course, setCourse]           = useState<Course | null>(null)
+  const [loading, setLoading]         = useState(true)
+  const [enrolling, setEnrolling]     = useState(false)
+  const [enrolled, setEnrolled]       = useState(false)
+  const [message, setMessage]         = useState("")
   const [openChapter, setOpenChapter] = useState<string | null>(null)
 
   useEffect(() => {
-    const fetchCourse = async () => {
+    const load = async () => {
       setLoading(true)
       const res = await fetch(`/api/courses/${slug}`)
       if (!res.ok) { setCourse(null); setLoading(false); return }
       const data = await res.json()
       setCourse(data)
       if (data.chapters?.length > 0) setOpenChapter(data.chapters[0].id)
+
+      // Vérifier si déjà inscrit
+      if (session?.user) {
+        const checkRes = await fetch(`/api/enrollments/check?courseId=${data.id}`)
+        const checkData = await checkRes.json()
+        setEnrolled(checkData.enrolled)
+      }
+
       setLoading(false)
     }
-    if (slug) fetchCourse()
-  }, [slug])
+    if (slug) load()
+  }, [slug, session])
 
   const handleEnroll = async () => {
     if (!session) {
@@ -78,7 +87,7 @@ export default function CourseDetailPage() {
     const data = await res.json()
     if (data.enrolled) {
       setEnrolled(true)
-      setMessage("Inscription réussie ! Vous pouvez accéder à votre cours.")
+      setMessage("Inscription réussie !")
     } else {
       setMessage(data.error || "Erreur lors de l'inscription.")
     }
@@ -118,7 +127,6 @@ export default function CourseDetailPage() {
     <>
       <Navbar />
 
-      {/* Hero */}
       <div className={`bg-gradient-to-br ${gradients[course.category] || "from-zinc-800 to-zinc-900"} text-white`}>
         <div className="max-w-6xl mx-auto px-6 py-16">
           <Link href="/catalogue" className="flex items-center gap-2 text-white/70 hover:text-white text-sm mb-8 w-fit transition">
@@ -135,22 +143,12 @@ export default function CourseDetailPage() {
                   {levelLabels[course.level]}
                 </span>
               </div>
-              <h1 className="text-3xl md:text-4xl font-extrabold leading-tight mb-4">
-                {course.title}
-              </h1>
-              <p className="text-white/80 text-base leading-relaxed mb-6 max-w-2xl">
-                {course.description}
-              </p>
+              <h1 className="text-3xl md:text-4xl font-extrabold leading-tight mb-4">{course.title}</h1>
+              <p className="text-white/80 text-base leading-relaxed mb-6 max-w-2xl">{course.description}</p>
               <div className="flex flex-wrap gap-6 text-sm text-white/80">
-                <span className="flex items-center gap-2">
-                  <Users size={15} /> {course._count.enrollments} apprenants
-                </span>
-                <span className="flex items-center gap-2">
-                  <BarChart3 size={15} /> {levelLabels[course.level]}
-                </span>
-                <span className="flex items-center gap-2">
-                  <BookOpen size={15} /> Par {course.instructor.name}
-                </span>
+                <span className="flex items-center gap-2"><Users size={15} /> {course._count.enrollments} apprenants</span>
+                <span className="flex items-center gap-2"><BarChart3 size={15} /> {levelLabels[course.level]}</span>
+                <span className="flex items-center gap-2"><BookOpen size={15} /> Par {course.instructor.name}</span>
                 {totalLessons > 0 && (
                   <span className="flex items-center gap-2">
                     <Play size={15} /> {totalLessons} leçons
@@ -182,10 +180,10 @@ export default function CourseDetailPage() {
 
               {enrolled ? (
                 <Link
-                  href="/student"
+                  href={`/learn/${course.slug}`}
                   className="w-full flex items-center justify-center gap-2 py-3.5 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition"
                 >
-                  <CheckCircle size={18} /> Accéder à mon cours
+                  <Play size={18} /> Accéder au cours
                 </Link>
               ) : (
                 <button
@@ -205,9 +203,7 @@ export default function CourseDetailPage() {
               {!session && (
                 <p className="text-xs text-zinc-500 text-center mt-3">
                   Un compte est requis.{" "}
-                  <Link href="/register" className="text-violet-700 font-semibold hover:underline">
-                    Créer un compte
-                  </Link>
+                  <Link href="/register" className="text-violet-700 font-semibold hover:underline">Créer un compte</Link>
                 </p>
               )}
 
@@ -223,84 +219,61 @@ export default function CourseDetailPage() {
         </div>
       </div>
 
-      {/* Contenu du cours */}
+      {/* Programme */}
       <div className="max-w-6xl mx-auto px-6 py-16">
-        <div className="grid lg:grid-cols-[1fr_380px] gap-10">
-          <div>
-            {/* Programme */}
-            {course.chapters.length > 0 && (
-              <div className="mb-10">
-                <h2 className="text-2xl font-extrabold text-ink mb-2">Programme du cours</h2>
-                <p className="text-zinc-500 text-sm mb-6">
-                  {course.chapters.length} chapitres · {totalLessons} leçons
-                  {freeLessons > 0 && ` · ${freeLessons} leçons gratuites`}
-                </p>
-                <div className="space-y-3">
-                  {course.chapters.map((chapter) => (
-                    <div key={chapter.id} className="bg-white border border-zinc-200 rounded-2xl overflow-hidden">
-                      <button
-                        onClick={() => setOpenChapter(openChapter === chapter.id ? null : chapter.id)}
-                        className="w-full flex items-center justify-between px-5 py-4 hover:bg-zinc-50 transition"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="w-7 h-7 bg-violet-100 text-violet-700 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0">
-                            {chapter.order}
-                          </div>
-                          <span className="text-sm font-bold text-ink text-left">{chapter.title}</span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <span className="text-xs text-zinc-400">{chapter.lessons.length} leçons</span>
-                          {openChapter === chapter.id
-                            ? <ChevronDown size={16} className="text-zinc-400" />
-                            : <ChevronRight size={16} className="text-zinc-400" />
-                          }
-                        </div>
-                      </button>
-                      {openChapter === chapter.id && chapter.lessons.length > 0 && (
-                        <div className="border-t border-zinc-100">
-                          {chapter.lessons.map((lesson) => (
-                            <div key={lesson.id} className="flex items-center gap-3 px-5 py-3 border-b border-zinc-50 last:border-0">
-                              <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${lesson.isFree ? "bg-emerald-100 text-emerald-600" : "bg-zinc-100 text-zinc-400"}`}>
-                                {lesson.isFree ? <Play size={13} /> : <Lock size={13} />}
-                              </div>
-                              <span className="text-sm text-zinc-700 flex-1">{lesson.title}</span>
-                              <div className="flex items-center gap-2">
-                                {lesson.isFree && (
-                                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
-                                    Aperçu
-                                  </span>
-                                )}
-                                {lesson.duration > 0 && (
-                                  <span className="text-xs text-zinc-400">{lesson.duration} min</span>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+        {course.chapters.length > 0 && (
+          <div className="max-w-3xl">
+            <h2 className="text-2xl font-extrabold text-ink mb-2">Programme du cours</h2>
+            <p className="text-zinc-500 text-sm mb-6">
+              {course.chapters.length} chapitres · {totalLessons} leçons
+              {freeLessons > 0 && ` · ${freeLessons} aperçus gratuits`}
+            </p>
+            <div className="space-y-3">
+              {course.chapters.map((chapter) => (
+                <div key={chapter.id} className="bg-white border border-zinc-200 rounded-2xl overflow-hidden">
+                  <button
+                    onClick={() => setOpenChapter(openChapter === chapter.id ? null : chapter.id)}
+                    className="w-full flex items-center justify-between px-5 py-4 hover:bg-zinc-50 transition"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-7 h-7 bg-violet-100 text-violet-700 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0">
+                        {chapter.order}
+                      </div>
+                      <span className="text-sm font-bold text-ink text-left">{chapter.title}</span>
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Formateur */}
-            <div className="bg-white rounded-2xl border border-zinc-200 p-6">
-              <h2 className="text-lg font-bold text-ink mb-4">Votre formateur</h2>
-              <div className="flex items-start gap-4">
-                <div className="w-14 h-14 bg-violet-700 rounded-full flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
-                  {course.instructor.name?.charAt(0) || "F"}
-                </div>
-                <div>
-                  <p className="font-bold text-ink">{course.instructor.name}</p>
-                  {course.instructor.bio && (
-                    <p className="text-sm text-zinc-500 mt-1 leading-relaxed">{course.instructor.bio}</p>
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs text-zinc-400">{chapter.lessons.length} leçons</span>
+                      {openChapter === chapter.id
+                        ? <ChevronDown size={16} className="text-zinc-400" />
+                        : <ChevronRight size={16} className="text-zinc-400" />
+                      }
+                    </div>
+                  </button>
+                  {openChapter === chapter.id && chapter.lessons.length > 0 && (
+                    <div className="border-t border-zinc-100">
+                      {chapter.lessons.map((lesson) => (
+                        <div key={lesson.id} className="flex items-center gap-3 px-5 py-3 border-b border-zinc-50 last:border-0">
+                          <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${lesson.isFree ? "bg-emerald-100 text-emerald-600" : "bg-zinc-100 text-zinc-400"}`}>
+                            {lesson.isFree ? <Play size={13} /> : <Lock size={13} />}
+                          </div>
+                          <span className="text-sm text-zinc-700 flex-1">{lesson.title}</span>
+                          <div className="flex items-center gap-2">
+                            {lesson.isFree && (
+                              <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Aperçu</span>
+                            )}
+                            {lesson.duration > 0 && (
+                              <span className="text-xs text-zinc-400">{lesson.duration} min</span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </div>
-              </div>
+              ))}
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       <Footer />
