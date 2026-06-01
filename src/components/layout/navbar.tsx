@@ -76,7 +76,8 @@ export default function Navbar() {
         <div className="md:hidden border-t border-zinc-200 bg-white px-6 py-4 space-y-3">
           <Link href="#catalogue" className="block text-sm font-medium text-zinc-700" onClick={() => setOpen(false)}>Catalogue</Link>
           <Link href="#parcours" className="block text-sm font-medium text-zinc-700" onClick={() => setOpen(false)}>Parcours</Link>
-          <Link href="#pourquoi" className="block text-sm font-medium text-zinc-700" onClick={() => setOpen(false)}>Pourquoi nous</Link>
+          <Link href="#pourquoi" className="text-sm font-medium text-zinc-600 hover:text-violet-700 transition">Pourquoi nous</Link>
+          <Link href="/become-instructor" className="text-sm font-medium text-zinc-600 hover:text-violet-700 transition">Devenir formateur</Link>
           <hr className="my-3" />
           {isLoggedIn ? (
             <Link
