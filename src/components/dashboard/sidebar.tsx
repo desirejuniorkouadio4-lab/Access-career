@@ -6,40 +6,42 @@ import { signOut } from "next-auth/react"
 import {
   LayoutDashboard, BookOpen, Search, Award, User, Settings,
   LogOut, GraduationCap, PlusCircle, Users, BarChart3,
-  FolderOpen, Shield, X, Star, TrendingUp, FileText, Briefcase,
+  FolderOpen, Shield, X, Star, TrendingUp, FileText,
+  Briefcase, UserCheck,
 } from "lucide-react"
 
 const studentMenu = [
-  { label: "Dashboard",    href: "/student",              icon: LayoutDashboard },
-  { label: "Mes cours",    href: "/student/courses",       icon: BookOpen },
-  { label: "Catalogue",    href: "/catalogue",             icon: Search },
-  { label: "Devoirs",      href: "/student/assignments",   icon: FileText },
-  { label: "Certificats",  href: "/student/certificates",  icon: Award },
-  { label: "Portfolio",    href: "/student/portfolio",     icon: Briefcase },
-  { label: "Mon profil",   href: "/student/profile",       icon: User },
+  { label: "Dashboard",   href: "/student",             icon: LayoutDashboard },
+  { label: "Mes cours",   href: "/student/courses",     icon: BookOpen },
+  { label: "Catalogue",   href: "/catalogue",           icon: Search },
+  { label: "Devoirs",     href: "/student/assignments", icon: FileText },
+  { label: "Certificats", href: "/student/certificates",icon: Award },
+  { label: "Portfolio",   href: "/student/portfolio",   icon: Briefcase },
+  { label: "Mon profil",  href: "/student/profile",     icon: User },
 ]
 
 const instructorMenu = [
-  { label: "Dashboard",    href: "/instructor",             icon: LayoutDashboard },
-  { label: "Mes cours",    href: "/instructor/courses",     icon: FolderOpen },
-  { label: "Créer un cours", href: "/instructor/courses/new", icon: PlusCircle },
-  { label: "Apprenants",   href: "/instructor/students",    icon: Users },
-  { label: "Corrections",  href: "/instructor/corrections", icon: FileText },
-  { label: "Revenus",      href: "/instructor/revenue",     icon: BarChart3 },
-  { label: "Mon profil",   href: "/instructor/profile",     icon: User },
+  { label: "Dashboard",     href: "/instructor",              icon: LayoutDashboard },
+  { label: "Mes cours",     href: "/instructor/courses",      icon: FolderOpen },
+  { label: "Créer un cours",href: "/instructor/courses/new",  icon: PlusCircle },
+  { label: "Apprenants",    href: "/instructor/students",     icon: Users },
+  { label: "Corrections",   href: "/instructor/corrections",  icon: FileText },
+  { label: "Revenus",       href: "/instructor/revenue",      icon: BarChart3 },
+  { label: "Mon profil",    href: "/instructor/profile",      icon: User },
 ]
 
 const adminMenu = [
-  { label: "Dashboard",    href: "/admin",                  icon: LayoutDashboard },
-  { label: "Utilisateurs", href: "/admin/users",            icon: Users },
-  { label: "Formations",   href: "/admin/courses",          icon: BookOpen },
-  { label: "Catégories",   href: "/admin/categories",       icon: FolderOpen },
-  { label: "Certificats",  href: "/admin/certificates",     icon: Award },
-  { label: "Avis",         href: "/admin/reviews",          icon: Star },
-  { label: "Signalements", href: "/admin/reports",          icon: Shield },
-  { label: "Paiements",    href: "/admin/payments",         icon: TrendingUp },
-  { label: "Analytics",    href: "/admin/analytics",        icon: BarChart3 },
-  { label: "Paramètres",   href: "/admin/settings",         icon: Settings },
+  { label: "Dashboard",          href: "/admin",             icon: LayoutDashboard },
+  { label: "Utilisateurs",       href: "/admin/users",       icon: Users },
+  { label: "Rôles & Candidatures",href: "/admin/roles",      icon: UserCheck },
+  { label: "Formations",         href: "/admin/courses",     icon: BookOpen },
+  { label: "Catégories",         href: "/admin/categories",  icon: FolderOpen },
+  { label: "Certificats",        href: "/admin/certificates",icon: Award },
+  { label: "Avis",               href: "/admin/reviews",     icon: Star },
+  { label: "Signalements",       href: "/admin/reports",     icon: Shield },
+  { label: "Paiements",          href: "/admin/payments",    icon: TrendingUp },
+  { label: "Analytics",          href: "/admin/analytics",   icon: BarChart3 },
+  { label: "Paramètres",         href: "/admin/settings",    icon: Settings },
 ]
 
 interface SidebarProps {
@@ -53,14 +55,14 @@ export default function Sidebar({ user, open, onClose }: SidebarProps) {
   const role = user.role || "STUDENT"
 
   const menu =
-    role === "ADMIN" ? adminMenu
+    role === "ADMIN"      ? adminMenu
     : role === "INSTRUCTOR" ? instructorMenu
     : studentMenu
 
   const roleLabel =
-    role === "ADMIN" ? "Administrateur"
+    role === "ADMIN"      ? "Administrateur"
     : role === "INSTRUCTOR" ? "Formateur"
-    : role === "MODERATOR" ? "Modérateur"
+    : role === "MODERATOR"  ? "Modérateur"
     : "Apprenant"
 
   return (
@@ -92,7 +94,9 @@ export default function Sidebar({ user, open, onClose }: SidebarProps) {
 
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           {menu.map((item) => {
-            const isActive = pathname === item.href || (item.href !== "/admin" && item.href !== "/instructor" && item.href !== "/student" && pathname.startsWith(item.href))
+            const isActive =
+              pathname === item.href ||
+              (item.href.length > 10 && pathname.startsWith(item.href))
             return (
               <Link key={item.href} href={item.href} onClick={onClose}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition ${isActive ? "bg-violet-700 text-white" : "text-zinc-400 hover:text-white hover:bg-zinc-800"}`}>

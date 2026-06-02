@@ -101,6 +101,7 @@ model User {
   reviewedSubmissions  AssignmentSubmission[] @relation("Reviewer")
   portfolioProjects    PortfolioProject[]
   notes                StudentNote[]
+  instructorApplications InstructorApplication[]
 }
 
 model Account {
@@ -440,4 +441,21 @@ model PortfolioProject {
   updatedAt    DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ══ INSTRUCTOR APPLICATIONS ══
+model InstructorApplication {
+  id           String   @id @default(cuid())
+  userId       String
+  expertise    String
+  experience   String   @db.Text
+  courseIdea   String   @db.Text
+  linkedin     String?
+  status       String   @default("PENDING")
+  adminNote    String?
+  createdAt    DateTime @default(now())
+  reviewedAt   DateTime?
+  reviewedById String?
+
+  user     User  @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
