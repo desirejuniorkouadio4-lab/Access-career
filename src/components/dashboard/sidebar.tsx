@@ -10,7 +10,9 @@ import {
   Briefcase, UserCheck, HelpCircle, MessageSquare, Flag,
 } from "lucide-react"
 
-const studentMenu = [
+type MenuItem = { label: string; href: string; icon: any }
+
+const studentMenu: MenuItem[] = [
   { label: "Dashboard",    href: "/student",              icon: LayoutDashboard },
   { label: "Mes cours",    href: "/student/courses",      icon: BookOpen },
   { label: "Catalogue",    href: "/catalogue",            icon: Search },
@@ -21,7 +23,7 @@ const studentMenu = [
   { label: "Mon profil",   href: "/student/profile",      icon: User },
 ]
 
-const instructorMenu = [
+const instructorMenu: MenuItem[] = [
   { label: "Dashboard",      href: "/instructor",             icon: LayoutDashboard },
   { label: "Mes cours",      href: "/instructor/courses",     icon: FolderOpen },
   { label: "Créer un cours", href: "/instructor/courses/new", icon: PlusCircle },
@@ -31,14 +33,14 @@ const instructorMenu = [
   { label: "Mon profil",     href: "/instructor/profile",     icon: User },
 ]
 
-const moderatorMenu = [
-  { label: "Dashboard",    href: "/moderator",           icon: LayoutDashboard },
-  { label: "Signalements", href: "/moderator/reports",   icon: Flag },
-  { label: "Forums",       href: "/moderator/forums",    icon: MessageSquare },
-  { label: "Mon profil",   href: "/moderator/profile",   icon: User },
+const moderatorMenu: MenuItem[] = [
+  { label: "Dashboard",    href: "/moderator",         icon: LayoutDashboard },
+  { label: "Signalements", href: "/moderator/reports", icon: Flag },
+  { label: "Forums",       href: "/moderator/forums",  icon: MessageSquare },
+  { label: "Mon profil",   href: "/moderator/profile", icon: User },
 ]
 
-const adminMenu = [
+const adminMenu: MenuItem[] = [
   { label: "Dashboard",           href: "/admin",             icon: LayoutDashboard },
   { label: "Utilisateurs",        href: "/admin/users",       icon: Users },
   { label: "Rôles & Candidatures",href: "/admin/roles",       icon: UserCheck },
@@ -51,6 +53,21 @@ const adminMenu = [
   { label: "Analytics",           href: "/admin/analytics",   icon: BarChart3 },
   { label: "Paramètres",          href: "/admin/settings",    icon: Settings },
 ]
+
+function findActiveHref(menu: MenuItem[], pathname: string): string {
+  // 1. Exact match wins
+  const exact = menu.find(m => m.href === pathname)
+  if (exact) return exact.href
+
+  // 2. Longest prefix match wins
+  let best = ""
+  for (const item of menu) {
+    if (pathname.startsWith(item.href + "/") && item.href.length > best.length) {
+      best = item.href
+    }
+  }
+  return best
+}
 
 interface SidebarProps {
   user: { name?: string | null; email?: string | null; role?: string }
@@ -74,11 +91,11 @@ export default function Sidebar({ user, open, onClose }: SidebarProps) {
     : role === "MODERATOR"  ? "Modérateur"
     : "Apprenant"
 
+  const activeHref = findActiveHref(menu, pathname)
+
   return (
     <>
-      {open && (
-        <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={onClose} />
-      )}
+      {open && <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={onClose} />}
       <aside className={`fixed top-0 left-0 h-full w-[260px] bg-ink text-white flex flex-col z-50 transition-transform duration-300 ${open ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 lg:static lg:z-auto`}>
         <div className="flex items-center justify-between px-5 py-5 border-b border-zinc-800">
           <Link href="/" className="flex items-center gap-2">
@@ -104,22 +121,21 @@ export default function Sidebar({ user, open, onClose }: SidebarProps) {
         </div>
 
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          {menu.map((item) => {
-            const isActive =
-              pathname === item.href ||
-              (item.href.length > 10 && pathname.startsWith(item.href))
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={onClose}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition ${isActive ? "bg-violet-700 text-white" : "text-zinc-400 hover:text-white hover:bg-zinc-800"}`}
-              >
-                <item.icon size={18} />
-                {item.label}
-              </Link>
-            )
-          })}
+          {menu.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={onClose}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition ${
+                item.href === activeHref
+                  ? "bg-violet-700 text-white"
+                  : "text-zinc-400 hover:text-white hover:bg-zinc-800"
+              }`}
+            >
+              <item.icon size={18} />
+              {item.label}
+            </Link>
+          ))}
         </nav>
 
         <div className="px-3 py-4 border-t border-zinc-800">
