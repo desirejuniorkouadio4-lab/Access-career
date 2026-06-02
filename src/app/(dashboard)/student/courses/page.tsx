@@ -81,7 +81,7 @@ export default function MyCoursesPage() {
       ) : (
         <div className="grid md:grid-cols-2 gap-4">
           {filtered.map((e) => (
-            <Link key={e.enrollmentId} href={`/learn/${e.course.slug}`}
+            <Link key={e.enrollmentId} href={`/student/courses/${e.course.slug}`}
               className="bg-white rounded-2xl border border-zinc-200 overflow-hidden hover:border-violet-300 transition-all group">
               <div className={`h-24 bg-gradient-to-br ${gradients[e.course.category] || "from-zinc-700 to-zinc-900"} flex items-end p-4 relative`}>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
