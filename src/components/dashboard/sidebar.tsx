@@ -12,7 +12,7 @@ import {
 const studentMenu = [
   { label: "Dashboard", href: "/student", icon: LayoutDashboard },
   { label: "Mes cours", href: "/student/courses", icon: BookOpen },
-  { label: "Catalogue", href: "/student/catalogue", icon: Search },
+  { label: "Catalogue", href: "/catalogue", icon: Search },
   { label: "Certificats", href: "/student/certificates", icon: Award },
   { label: "Mon profil", href: "/student/profile", icon: User },
 ]

@@ -31,6 +31,7 @@ export default function NewCoursePage() {
     category: "",
     level: "BEGINNER",
     price: "",
+    thumbnail: "",
     isFree: false,
   })
 

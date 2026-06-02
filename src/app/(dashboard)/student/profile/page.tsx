@@ -100,6 +100,11 @@ export default function StudentProfilePage() {
 
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
+        <div>
+          <label className="block text-xs font-semibold text-zinc-500 mb-1.5 uppercase tracking-wider">Photo de profil (URL)</label>
+          <input name="image" value={form.image} onChange={handleChange} placeholder="https://exemple.com/ma-photo.jpg"
+            className="w-full px-4 py-2.5 rounded-xl border border-zinc-300 text-sm outline-none focus:border-violet-600 transition" />
+        </div>
             <label className="block text-xs font-semibold text-zinc-500 mb-1.5 uppercase tracking-wider">Nom complet</label>
             <input name="name" value={form.name} onChange={handleChange}
               className="w-full px-4 py-2.5 rounded-xl border border-zinc-300 text-sm outline-none focus:border-violet-600 transition" />
