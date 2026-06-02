@@ -41,7 +41,7 @@ export async function POST(req: Request) {
     if (role !== "INSTRUCTOR" && role !== "ADMIN") {
       return NextResponse.json({ error: "Réservé aux formateurs." }, { status: 403 })
     }
-    const { title, description, category, level, price, isFree } = await req.json()
+    const { title, description, category, level, price, isFree, thumbnail } = await req.json()
     if (!title || !category || !description) {
       return NextResponse.json({ error: "Champs requis manquants." }, { status: 400 })
     }
@@ -51,6 +51,7 @@ export async function POST(req: Request) {
         title, slug, description, category, level,
         price: isFree ? 0 : price || 0,
         isFree, status: "DRAFT",
+        thumbnail: thumbnail || null,
         instructorId: session.user.id!,
       },
     })

@@ -129,7 +129,7 @@ export default function LearnPage() {
             <p className="text-sm font-bold text-white truncate max-w-[180px] md:max-w-sm">
               {course.title}
             </p>
-            <p className="text-xs text-zinc-500">{course.instructor.name}</p>
+            <p className="text-xs text-zinc-500">{course.instructor.name}</p></div><div className="flex items-center gap-2"><a href={`/forum/${course.id}`} className="px-2.5 py-1 bg-zinc-800 hover:bg-violet-700 rounded-lg text-xs font-semibold text-zinc-300 hover:text-white transition">Forum</a>
           </div>
         </div>
         <div className="flex items-center gap-4">

@@ -190,6 +190,22 @@ export default function StudentDashboard() {
         </>
       )}
 
+      {/* Actions rapides */}
+      <div className="grid md:grid-cols-3 gap-4">
+        <a href="/student/assignments" className="bg-white rounded-2xl border border-zinc-200 p-5 hover:border-violet-300 transition group">
+          <p className="text-sm font-bold text-ink group-hover:text-violet-700 transition">Mes devoirs</p>
+          <p className="text-xs text-zinc-500 mt-1">Voir vos devoirs et projets.</p>
+        </a>
+        <a href="/student/portfolio" className="bg-white rounded-2xl border border-zinc-200 p-5 hover:border-violet-300 transition group">
+          <p className="text-sm font-bold text-ink group-hover:text-violet-700 transition">Mon portfolio</p>
+          <p className="text-xs text-zinc-500 mt-1">Vos projets réalisés.</p>
+        </a>
+        <a href="/student/certificates" className="bg-white rounded-2xl border border-zinc-200 p-5 hover:border-violet-300 transition group">
+          <p className="text-sm font-bold text-ink group-hover:text-violet-700 transition">Mes certificats</p>
+          <p className="text-xs text-zinc-500 mt-1">Téléchargez vos certificats.</p>
+        </a>
+      </div>
+
       {/* Découvrir plus */}
       {enrollments.length > 0 && (
         <div className="bg-ink rounded-2xl p-6 flex flex-wrap items-center justify-between gap-4">
