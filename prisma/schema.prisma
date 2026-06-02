@@ -100,6 +100,7 @@ model User {
   handledReports       Report[]            @relation("Handler")
   reviewedSubmissions  AssignmentSubmission[] @relation("Reviewer")
   portfolioProjects    PortfolioProject[]
+  notifications          Notification[]
   notes                StudentNote[]
   instructorApplications InstructorApplication[]
 }
@@ -458,4 +459,18 @@ model InstructorApplication {
   reviewedById String?
 
   user     User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ══ NOTIFICATIONS ══
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  message   String   @db.Text
+  link      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
