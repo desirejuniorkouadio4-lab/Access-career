@@ -32,7 +32,7 @@ export default function Navbar() {
           <Link href="/catalogue" className="text-sm font-medium text-zinc-600 hover:text-violet-700 transition">
             Catalogue
           </Link>
-          <Link href="#parcours" className="text-sm font-medium text-zinc-600 hover:text-violet-700 transition">
+          <Link href="/parcours" className="text-sm font-medium text-zinc-600 hover:text-violet-700 transition">
             Parcours
           </Link>
           <Link href="#pourquoi" className="text-sm font-medium text-zinc-600 hover:text-violet-700 transition">
