@@ -1,9 +1,11 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { BookOpen, Edit, Eye, Loader2, PlusCircle, Users, Trash2, HelpCircle, FileText, ChevronRight } from "lucide-react"
+import {
+  BookOpen, Edit, Loader2, PlusCircle, Users,
+  HelpCircle, FileText, Eye
+} from "lucide-react"
 
 type Course = {
   id: string; title: string; slug: string; category: string; status: string
@@ -20,17 +22,16 @@ const statusConfig: Record<string, { label: string; color: string }> = {
 }
 
 const catLabels: Record<string, string> = {
-  INFORMATIQUE: "Informatique", IA_DATA: "IA & Data", DEVELOPPEMENT: "Développement",
-  COMMUNICATION: "Communication", EMPLOYABILITE: "Employabilité",
-  MARKETING: "Marketing", DESIGN: "Design", LANGUES: "Langues",
+  INFORMATIQUE: "Informatique", IA_DATA: "IA & Data",
+  DEVELOPPEMENT: "Développement", COMMUNICATION: "Communication",
+  EMPLOYABILITE: "Employabilité", MARKETING: "Marketing",
+  DESIGN: "Design", LANGUES: "Langues",
 }
 
 export default function InstructorCoursesPage() {
-  const searchParams = useSearchParams()
-  const initialFilter = searchParams.get("filter") || "ALL"
   const [courses, setCourses] = useState<Course[]>([])
-  const [loading, setLoading]   = useState(true)
-  const [filter, setFilter]     = useState(initialFilter)
+  const [loading, setLoading] = useState(true)
+  const [filter, setFilter]   = useState("ALL")
 
   useEffect(() => {
     setLoading(true)
@@ -50,7 +51,9 @@ export default function InstructorCoursesPage() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-ink">Mes formations</h1>
-          <p className="text-zinc-500 text-sm mt-1">{courses.length} formation{courses.length > 1 ? "s" : ""} au total</p>
+          <p className="text-zinc-500 text-sm mt-1">
+            {courses.length} formation{courses.length > 1 ? "s" : ""} au total
+          </p>
         </div>
         <Link href="/instructor/courses/new"
           className="flex items-center gap-2 px-5 py-2.5 bg-violet-700 text-white text-sm font-semibold rounded-xl hover:bg-violet-800 transition">
@@ -58,23 +61,26 @@ export default function InstructorCoursesPage() {
         </Link>
       </div>
 
-      {/* Onglets */}
+      {/* Filtres */}
       <div className="flex gap-2 flex-wrap">
         {["ALL", "PUBLISHED", "DRAFT", "PENDING", "REJECTED"].map(s => (
           <button key={s} onClick={() => setFilter(s)}
             className={`px-3 py-1.5 text-xs font-bold rounded-xl transition ${filter === s ? "bg-violet-700 text-white" : "bg-white border border-zinc-200 text-zinc-600 hover:border-violet-300"}`}>
-            {s === "ALL" ? "Tous" : statusConfig[s]?.label} ({counts[s] || 0})
+            {s === "ALL" ? "Toutes" : statusConfig[s]?.label} ({counts[s] || 0})
           </button>
         ))}
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-16"><Loader2 size={24} className="animate-spin text-violet-600" /></div>
+        <div className="flex justify-center py-16">
+          <Loader2 size={24} className="animate-spin text-violet-600" />
+        </div>
       ) : filtered.length === 0 ? (
         <div className="bg-white rounded-2xl border border-zinc-200 p-12 text-center">
           <BookOpen size={28} className="text-zinc-400 mx-auto mb-3" />
           <p className="text-zinc-500 text-sm mb-4">Aucune formation dans cette catégorie.</p>
-          <Link href="/instructor/courses/new" className="inline-flex items-center gap-2 px-5 py-2.5 bg-violet-700 text-white text-sm font-semibold rounded-xl hover:bg-violet-800 transition">
+          <Link href="/instructor/courses/new"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-violet-700 text-white text-sm font-semibold rounded-xl hover:bg-violet-800 transition">
             <PlusCircle size={15} /> Créer ma première formation
           </Link>
         </div>
@@ -89,7 +95,6 @@ export default function InstructorCoursesPage() {
                     : <BookOpen size={20} className="text-violet-600" />
                   }
                 </div>
-
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
                     <h3 className="text-sm font-bold text-ink">{c.title}</h3>
@@ -104,11 +109,10 @@ export default function InstructorCoursesPage() {
                     <span>{c.isFree ? "Gratuit" : `${c.price.toLocaleString("fr-FR")} F`}</span>
                   </div>
 
-                  {/* Actions */}
                   <div className="flex flex-wrap gap-2">
                     <Link href={`/instructor/courses/${c.id}/edit`}
                       className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-100 text-violet-700 text-xs font-semibold rounded-lg hover:bg-violet-200 transition">
-                      <Edit size={12} /> Éditer le cours
+                      <Edit size={12} /> Éditer
                     </Link>
                     <Link href={`/instructor/courses/${c.id}/quiz`}
                       className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 text-blue-700 text-xs font-semibold rounded-lg hover:bg-blue-200 transition">
