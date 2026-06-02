@@ -7,41 +7,49 @@ import {
   LayoutDashboard, BookOpen, Search, Award, User, Settings,
   LogOut, GraduationCap, PlusCircle, Users, BarChart3,
   FolderOpen, Shield, X, Star, TrendingUp, FileText,
-  Briefcase, UserCheck,
+  Briefcase, UserCheck, HelpCircle, MessageSquare, Flag,
 } from "lucide-react"
 
 const studentMenu = [
-  { label: "Dashboard",   href: "/student",             icon: LayoutDashboard },
-  { label: "Mes cours",   href: "/student/courses",     icon: BookOpen },
-  { label: "Catalogue",   href: "/catalogue",           icon: Search },
-  { label: "Devoirs",     href: "/student/assignments", icon: FileText },
-  { label: "Certificats", href: "/student/certificates",icon: Award },
-  { label: "Portfolio",   href: "/student/portfolio",   icon: Briefcase },
-  { label: "Mon profil",  href: "/student/profile",     icon: User },
+  { label: "Dashboard",    href: "/student",              icon: LayoutDashboard },
+  { label: "Mes cours",    href: "/student/courses",      icon: BookOpen },
+  { label: "Catalogue",    href: "/catalogue",            icon: Search },
+  { label: "Devoirs",      href: "/student/assignments",  icon: FileText },
+  { label: "Quiz",         href: "/student/quizzes",      icon: HelpCircle },
+  { label: "Certificats",  href: "/student/certificates", icon: Award },
+  { label: "Portfolio",    href: "/student/portfolio",    icon: Briefcase },
+  { label: "Mon profil",   href: "/student/profile",      icon: User },
 ]
 
 const instructorMenu = [
-  { label: "Dashboard",     href: "/instructor",              icon: LayoutDashboard },
-  { label: "Mes cours",     href: "/instructor/courses",      icon: FolderOpen },
-  { label: "Créer un cours",href: "/instructor/courses/new",  icon: PlusCircle },
-  { label: "Apprenants",    href: "/instructor/students",     icon: Users },
-  { label: "Corrections",   href: "/instructor/corrections",  icon: FileText },
-  { label: "Revenus",       href: "/instructor/revenue",      icon: BarChart3 },
-  { label: "Mon profil",    href: "/instructor/profile",      icon: User },
+  { label: "Dashboard",      href: "/instructor",             icon: LayoutDashboard },
+  { label: "Mes cours",      href: "/instructor/courses",     icon: FolderOpen },
+  { label: "Créer un cours", href: "/instructor/courses/new", icon: PlusCircle },
+  { label: "Apprenants",     href: "/instructor/students",    icon: Users },
+  { label: "Corrections",    href: "/instructor/corrections", icon: FileText },
+  { label: "Revenus",        href: "/instructor/revenue",     icon: BarChart3 },
+  { label: "Mon profil",     href: "/instructor/profile",     icon: User },
+]
+
+const moderatorMenu = [
+  { label: "Dashboard",    href: "/moderator",           icon: LayoutDashboard },
+  { label: "Signalements", href: "/moderator/reports",   icon: Flag },
+  { label: "Forums",       href: "/moderator/forums",    icon: MessageSquare },
+  { label: "Mon profil",   href: "/moderator/profile",   icon: User },
 ]
 
 const adminMenu = [
-  { label: "Dashboard",          href: "/admin",             icon: LayoutDashboard },
-  { label: "Utilisateurs",       href: "/admin/users",       icon: Users },
-  { label: "Rôles & Candidatures",href: "/admin/roles",      icon: UserCheck },
-  { label: "Formations",         href: "/admin/courses",     icon: BookOpen },
-  { label: "Catégories",         href: "/admin/categories",  icon: FolderOpen },
-  { label: "Certificats",        href: "/admin/certificates",icon: Award },
-  { label: "Avis",               href: "/admin/reviews",     icon: Star },
-  { label: "Signalements",       href: "/admin/reports",     icon: Shield },
-  { label: "Paiements",          href: "/admin/payments",    icon: TrendingUp },
-  { label: "Analytics",          href: "/admin/analytics",   icon: BarChart3 },
-  { label: "Paramètres",         href: "/admin/settings",    icon: Settings },
+  { label: "Dashboard",           href: "/admin",             icon: LayoutDashboard },
+  { label: "Utilisateurs",        href: "/admin/users",       icon: Users },
+  { label: "Rôles & Candidatures",href: "/admin/roles",       icon: UserCheck },
+  { label: "Formations",          href: "/admin/courses",     icon: BookOpen },
+  { label: "Catégories",          href: "/admin/categories",  icon: FolderOpen },
+  { label: "Certificats",         href: "/admin/certificates",icon: Award },
+  { label: "Avis",                href: "/admin/reviews",     icon: Star },
+  { label: "Signalements",        href: "/admin/reports",     icon: Shield },
+  { label: "Paiements",           href: "/admin/payments",    icon: TrendingUp },
+  { label: "Analytics",           href: "/admin/analytics",   icon: BarChart3 },
+  { label: "Paramètres",          href: "/admin/settings",    icon: Settings },
 ]
 
 interface SidebarProps {
@@ -57,6 +65,7 @@ export default function Sidebar({ user, open, onClose }: SidebarProps) {
   const menu =
     role === "ADMIN"      ? adminMenu
     : role === "INSTRUCTOR" ? instructorMenu
+    : role === "MODERATOR"  ? moderatorMenu
     : studentMenu
 
   const roleLabel =
@@ -67,7 +76,9 @@ export default function Sidebar({ user, open, onClose }: SidebarProps) {
 
   return (
     <>
-      {open && <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={onClose} />}
+      {open && (
+        <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={onClose} />
+      )}
       <aside className={`fixed top-0 left-0 h-full w-[260px] bg-ink text-white flex flex-col z-50 transition-transform duration-300 ${open ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 lg:static lg:z-auto`}>
         <div className="flex items-center justify-between px-5 py-5 border-b border-zinc-800">
           <Link href="/" className="flex items-center gap-2">
@@ -98,8 +109,12 @@ export default function Sidebar({ user, open, onClose }: SidebarProps) {
               pathname === item.href ||
               (item.href.length > 10 && pathname.startsWith(item.href))
             return (
-              <Link key={item.href} href={item.href} onClick={onClose}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition ${isActive ? "bg-violet-700 text-white" : "text-zinc-400 hover:text-white hover:bg-zinc-800"}`}>
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={onClose}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition ${isActive ? "bg-violet-700 text-white" : "text-zinc-400 hover:text-white hover:bg-zinc-800"}`}
+              >
                 <item.icon size={18} />
                 {item.label}
               </Link>
@@ -108,8 +123,10 @@ export default function Sidebar({ user, open, onClose }: SidebarProps) {
         </nav>
 
         <div className="px-3 py-4 border-t border-zinc-800">
-          <button onClick={() => signOut({ callbackUrl: "/" })}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-zinc-400 hover:text-red-400 hover:bg-zinc-800 transition w-full">
+          <button
+            onClick={() => signOut({ callbackUrl: "/" })}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-zinc-400 hover:text-red-400 hover:bg-zinc-800 transition w-full"
+          >
             <LogOut size={18} />
             Se déconnecter
           </button>
