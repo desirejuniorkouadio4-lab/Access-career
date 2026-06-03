@@ -20,6 +20,7 @@ const studentMenu: MenuItem[] = [
   { label: "Quiz",         href: "/student/quizzes",      icon: HelpCircle },
   { label: "Certificats",  href: "/student/certificates", icon: Award },
   { label: "Portfolio",    href: "/student/portfolio",    icon: Briefcase },
+  { label: "Carrière",     href: "/student/career",       icon: Briefcase },
   { label: "Mon profil",   href: "/student/profile",      icon: User },
 ]
 
