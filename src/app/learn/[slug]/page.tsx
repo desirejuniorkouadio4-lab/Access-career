@@ -1,4 +1,5 @@
 "use client"
+import AIAssistant from "@/components/ai/ai-assistant"
 
 import { useEffect, useState, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
@@ -348,6 +349,8 @@ export default function LearnPage() {
           </>
         )}
       </div>
+    
+      <AIAssistant courseTitle={course?.title || ""} lessonTitle={""} lessonContent={""} />
     </div>
   )
 }
