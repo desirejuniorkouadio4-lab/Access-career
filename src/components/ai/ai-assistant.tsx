@@ -105,7 +105,7 @@ export default function AIAssistant({ courseTitle, lessonTitle, lessonContent }:
               <input value={input} onChange={e => setInput(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && sendMessage()}
                 placeholder="Votre question..."
-                className="flex-1 px-3.5 py-2.5 bg-zinc-50 rounded-xl text-sm outline-none focus:bg-zinc-100 transition" />
+                className="flex-1 px-3.5 py-2.5 bg-zinc-50 rounded-xl text-sm outline-none focus:bg-zinc-100 transition text-ink placeholder:text-zinc-400" />
               <button onClick={sendMessage} disabled={!input.trim() || loading}
                 className="w-9 h-9 bg-violet-700 text-white rounded-xl flex items-center justify-center hover:bg-violet-800 transition disabled:opacity-40">
                 <Send size={15} />
