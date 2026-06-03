@@ -1,4 +1,5 @@
 "use client"
+import OnboardingWrapper from "@/components/onboarding/onboarding-wrapper"
 
 import { useState } from "react"
 import { useSession } from "next-auth/react"
@@ -46,7 +47,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
 
         <main className="flex-1 overflow-y-auto p-6">
-          {children}
+          <OnboardingWrapper />
+            {children}
         </main>
       </div>
     </div>
